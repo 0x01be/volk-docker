@@ -1,22 +1,12 @@
+FROM 0x01be/volk:build as build
+
 FROM alpine
 
-RUN apk add --no-cache --virtual volk-build-dependencies \
-    git \
-    build-base \
-    cmake \
-    python3-dev \
+RUN apk add --no-cache --virtual volk-runtime-dependencies \
+    python3 \
     py3-mako
 
-ENV REVISION master
-RUN git clone --recursive --branch ${REVISION} https://github.com/gnuradio/volk /volk
+COPY --from=build /opt/volk/ /opt/volk/
 
-WORKDIR /volk/build
-
-RUN cmake \
-    -DCMAKE_INSTALL_PREFIX=/opt/volk \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DPYTHON_EXECUTABLE=/usr/bin/python3 \
-    ..
-RUN make
-RUN make install
+ENV LD_LIBRARY_PATH /usr/lib/:/opt/volk/lib/
 
